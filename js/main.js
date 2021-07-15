@@ -1,5 +1,16 @@
-import { setSearchFocus } from "./searchBar.js";
-import { getSearchTerm } from "./dataFunctions.js";
+import {
+  setSearchFocus,
+  showClearTextButton,
+  clearSearchText,
+  clearPushListener,
+} from "./searchBar.js";
+import {
+  deleteSearchResults,
+  buildSearchResults,
+  clearStatsLine,
+  setStatsLine,
+} from "./searchResults.js";
+import { getSearchTerm, retrieveSearchResults } from "./dataFunctions.js";
 
 document.addEventListener("readystatechange", (event) => {
   if (event.target.readyState === "complete") {
@@ -9,9 +20,11 @@ document.addEventListener("readystatechange", (event) => {
 
 const initApp = () => {
   setSearchFocus();
-
-  // 3 listeners clear text
-
+  const search = document.getElementById("search");
+  search.addEventListener("input", showClearTextButton);
+  const clear = document.getElementById("clear");
+  clear.addEventListener("click", clearSearchText);
+  clear.addEventListener("keydown", clearPushListener);
   const form = document.getElementById("searchBar");
   form.addEventListener("submit", submitTheSearch);
 };
@@ -19,15 +32,17 @@ const initApp = () => {
 // Procedural "workflow" function
 const submitTheSearch = (event) => {
   event.preventDefault();
-  // delete search results
+  deleteSearchResults();
   processTheSearch();
   setSearchFocus();
 };
 
 // Procedural
 const processTheSearch = async () => {
-  // clear the stats line
+  clearStatsLine();
   const searchTerm = getSearchTerm();
-  if (searchTerm === "") return;
-  const resultArray = await retriveSearchResults(searchTerm);
+  if (searchTerm === "") return; //TODO:
+  const resultArray = await retrieveSearchResults(searchTerm);
+  if (resultArray.length) buildSearchResults(resultArray);
+  setStatsLine(resultArray.length);
 };
